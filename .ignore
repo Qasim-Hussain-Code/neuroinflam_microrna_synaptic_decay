@@ -1,0 +1,13 @@
+# Search and Indexing Excludes (.ignore)
+# This file is used by tools like ripgrep and IDEs to prevent indexing large raw data directories.
+
+# Exclude raw biological data and generated results
+data/raw_expression/
+data/clinical_metadata/
+data/curated/
+results/differential_expression/
+results/correlation_analysis/
+results/figures/
+
+# File size limits (enforced via Git pre-commit hook)
+# All files exceeding 100 MB are automatically blocked from commits.

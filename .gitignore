@@ -36,9 +36,13 @@ venv.bak/
 
 # Generated Pipeline Data (Ignore raw/processed data and outputs, but keep folder structure)
 data/**/*
+!data/**/
 !data/**/.gitkeep
+!data/**/README.md
 results/**/*
+!results/**/
 !results/**/.gitkeep
+!results/**/README.md
 
 # IDEs
 .vscode/

@@ -1,91 +1,208 @@
-# miRNA_analysis
+# Joint miRNA-mRNA Transcriptomic Profiling of the Parietal Lobe Interactome in Alzheimer's Disease: A Confounder-Adjusted Network Biology Pipeline
 
-[![Python Version](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/)
-[![Conda](https://img.shields.io/badge/conda-enabled-green.svg)](https://conda.io/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+## Scientific Scope and Biological Background
+In post-mortem neurodegenerative research, identifying genuine transcriptional alterations is heavily confounded by technical artifacts. Human brain tissue is highly susceptible to post-mortem autolysis, which systematically degrades messenger RNAs (mRNAs). In contrast, microRNAs (miRNAs) complexed with the RNA-induced silencing complex (RISC) exhibit marked resilience to biochemical decay. 
 
-An end-to-end post-doc tier transcriptomics framework investigating **miRNA-mRNA regulatory networks in Post-Mortem Alzheimer's Disease (AD) Prefrontal Cortex (PFC)**, designed to account for technical autolysis and tissue degradation.
+Directly correlating transcript abundances without correcting for these differential degradation rates introduces high rates of false-positive co-expression signals. Specifically, co-degradation of fragile mRNAs is often misidentified as biological co-expression or target repression.
+
+This project implements an end-to-end network biology pipeline that resolves this challenge. The pipeline applies a multivariable covariate-adjusted regression model—acting as a "Post-Mortem Confounder Shield"—to isolate disease-associated signals from technical variables, including:
+1. **RNA Integrity Number (RIN)**: A metric for transcript degradation.
+2. **Post-Mortem Interval (PMI)**: The elapsed time between death and flash-freezing.
+3. **Clinical Demographics**: Controlling for donor age and biological sex.
+
+The pipeline processes both a simulated 120-donor cohort (designed to validate the statistical framework under controlled decay kinetics) and real-world microarrays from the NCBI GEO dataset GSE16759 (parietal cortex, matching miRNA and mRNA profiles across 8 matched donors).
 
 ---
 
-## 1. Scientific Overview & Hypothesis
+## Mathematical and Statistical Framework
 
-### Core Biological Question
-> **"Does chronic microglial neuroinflammation in the human prefrontal cortex systematically correlate with a non-linear decay of post-synaptic density scaffold machinery ($DLG4$/$PSD\text{-}95$) when statistically adjusting for post-mortem degradation metrics?"**
-
-### The Post-Mortem Confounder Shield
-Human brain tissue collected post-mortem is highly volatile; technical covariates like post-mortem interval (PMI) and sample degradation (RNA Integrity Number, or RIN) skew genetic signals. To survive peer review, this framework applies a multi-variable OLS regression to isolate disease effects while neutralizing technical artifacts:
+### 1. Multivariable Covariate-Adjusted Regression
+To determine the true effect of Alzheimer's Disease (AD) on expression levels, Ordinary Least Squares (OLS) regression models are fitted independently for each transcript:
 
 $$\log_2(\text{Expression}_{ij} + 1) = \beta_0 + \beta_1(\text{AD\_Status}_i) + \beta_2(\text{RIN}_i) + \beta_3(\text{PMI}_i) + \beta_4(\text{Age}_i) + \beta_5(\text{Sex}_i) + \epsilon_{ij}$$
 
 Where:
-* **`RIN` (RNA Integrity Number):** 1-10 scale measuring transcript degradation. (mRNAs show high sensitivity to degradation, whereas miRNAs associated with RISC complexes display higher technical resilience).
-* **`PMI` (Post-Mortem Interval):** Time (hours) elapsed between death and flash-freezing.
-* **`Age` & `Sex`:** Controls for demographic differences.
+- $\beta_1$ represents the adjusted effect size of Alzheimer's Disease status.
+- $\beta_2$ and $\beta_3$ control for autolysis (RIN and PMI, respectively).
+- $\beta_4$ and $\beta_5$ control for age and sex.
+- $\epsilon_{ij}$ represents the residual variation.
+
+For the real-world dataset GSE16759, continuous covariates (`Age` and `PMI`) are mean-centered to prevent multicollinearity and ensure stable parameter estimation.
+
+### 2. Variance Inflation Factor (VIF)
+Before OLS fitting, multicollinearity among predictors is assessed using the Variance Inflation Factor:
+
+$$\text{VIF}_k = \frac{1}{1 - R_k^2}$$
+
+Where $R_k^2$ is the coefficient of determination obtained by regressing the $k$-th predictor against all remaining predictors in the design matrix. Only design matrices with VIF scores below a conservative threshold of 5.0 are approved for OLS modeling, ensuring mathematical stability.
+
+### 3. Confounder-Adjusted Residual Correlation
+To isolate genuine biological co-expression, all technical and demographic covariates are regressed out to calculate the OLS residuals:
+
+$$\hat{\epsilon}_{ij} = \log_2(\text{Expression}_{ij} + 1) - X\hat{\beta}$$
+
+Pearson correlation coefficients ($r$) are computed directly on these residuals ($\hat{\epsilon}$), representing the co-variation that remains after eliminating technical and clinical confounders.
+
+### 4. Bootstrap Confidence Intervals
+To evaluate the stability of the residual correlations in small cohorts (such as the matched $N=8$ GEO cohort), 1,000-fold bootstrap resampling (sampling donors with replacement) is performed:
+- A correlation is flagged as **Robust** if and only if the 95% bootstrap confidence interval (percentiles 2.5 to 97.5) does not cross zero:
+
+$$\text{sign}(\text{CI}_{\text{lower}}) = \text{sign}(\text{CI}_{\text{upper}})$$
+
+### 5. Over-Representation Analysis (ORA)
+To test whether anti-correlated miRNA-mRNA pairs are enriched for experimentally validated targets, a one-tailed Fisher's Exact Test is applied to the contingency table:
+
+$$\text{Fisher's } p = \sum_{k=x}^{\min(K, n)} \frac{\binom{K}{k} \binom{N-K}{n-k}}{\binom{N}{n}}$$
+
+Where:
+- $N$ is the total number of possible miRNA-mRNA pairs.
+- $K$ is the total number of validated targets in the database.
+- $n$ is the number of pairs classified as significantly anti-correlated.
+- $x$ is the overlap (significantly anti-correlated pairs that are also validated).
+
+### 6. STRING PPI Network Integration
+The pipeline programmatically queries the STRING database API using the identified target transcripts to verify if they form a coordinated physical or functional protein complex. It computes the **PPI Enrichment p-value** relative to random genomic expectation, local clustering coefficients, and average node degrees.
+
+### 7. Diagnostic Logistic Regression Classifier
+To verify if technical-adjusted biological residuals retain diagnostic signals, univariate penalized Logistic Regression classifiers are fitted to predict AD status:
+
+$$P(\text{AD\_Status} = 1 \mid \hat{\epsilon}_g) = \frac{1}{1 + e^{-(\gamma_0 + \gamma_1 \hat{\epsilon}_g)}}$$
+
+Classification performance is evaluated using the Area Under the Receiver Operating Characteristic curve (ROC-AUC).
 
 ---
 
-## 2. Directory Architecture
+## Repository Architecture
 
 ```text
 miRNA_analysis/
-├── environment.yml                  # Conda environment pins
-├── .gitignore                       # Standard python and result ignore rules
-├── target_database.json             # Curated brain miRNA targets database
-├── run_mirna_pipeline.py            # Master simulation engine (with RIN/PMI covariates)
-├── run_real_data_pipeline.py        # Real-world dataset engine (NCBI GEO GSE16759)
+├── environment.yml                     # Conda virtual environment package pins
+├── .gitignore                          # Git tracking excludes (ignores raw matrices/tables)
+├── .ignore                             # Tool/IDE search excludes (ripgrep indexing patterns)
+├── target_database.json                # Curated dictionary of validated miRNA-mRNA targets
+├── run_mirna_pipeline.py               # Master simulated pipeline engine (N=120)
+├── run_real_data_pipeline.py           # Real-world dataset engine (NCBI GEO GSE16759)
+├── README.md                           # Main repository documentation
+├── LICENSE                             # MIT Open Source License terms
+├── results_report.md                   # In-depth scientific findings report
+├── walkthrough.md                      # Guide to local environment setup and execution
 │
-├── data/
-│   ├── raw_expression/              # Raw count matrices (TSV format)
-│   ├── clinical_metadata/           # Demographics and post-mortem covariates
-│   └── curated/                     # Intermediate curated files
+├── .git/
+│   └── hooks/
+│       └── pre-commit                  # Commit hook blocking files exceeding 100 MB
 │
-├── results/
-│   ├── differential_expression/      # Covariate-adjusted OLS metrics and FDR Q-values
-│   ├── correlation_analysis/         # Residual correlation coefficients & Fisher ORA
-│   └── figures/                      # High-resolution vector diagrams (SVG format)
+├── data/                               # Input data directory
+│   ├── raw_expression/                 # Ignored raw matrices (has GPL annotations & GSE txt.gz)
+│   │   └── README.md                   # Placeholder describing raw expression data
+│   ├── clinical_metadata/              # Ignored clinical covariate matrices
+│   │   └── README.md                   # Placeholder describing patient characteristics
+│   └── curated/                        # Ignored normalized TPM matrices
+│       └── README.md                   # Placeholder describing intermediate matrices
 │
-└── tests/
-    └── test_pipeline.py             # Unit tests checking statistical engines
+├── results/                            # Output directory (runtime populated)
+│   ├── differential_expression/        # Ignored OLS and classification tables
+│   │   └── README.md                   # Placeholder describing OLS statistical tables
+│   ├── correlation_analysis/           # Ignored Pearson, bootstrap CI, and Reactome tables
+│   │   └── README.md                   # Placeholder describing correlation and pathway data
+│   └── figures/                        # Ignored SVG vector graphic outputs
+│       └── README.md                   # Placeholder describing SVG publication figures
+│
+└── tests/                              # Unit test suite
+    └── test_pipeline.py                # Pytest script checking alignment and statistics
 ```
 
 ---
 
-## 3. Quick Start Setup
+## Setup and Local Execution
 
-### Step 1: Create the Environment
+### 1. Initialize the Virtual Environment
+Create and activate the environment using the provided package definitions:
 ```bash
 conda env create -f environment.yml
-```
-
-### Step 2: Activate the Environment
-```bash
 conda activate neuro_transcriptomics_env
 ```
 
-### Step 3: Option A - Run the Real-World Dataset Analysis
-This downloads the actual human brain microarray data from NCBI GEO GSE16759 (16 samples, 8 matched donors), maps probes, aligns samples, and runs OLS regressions and residual correlations on the real-world dataset:
+### 2. Execute the Real-World Pipeline
+This script downloads the GSE16759 dataset, maps microarray probe IDs to official HUGO Gene Nomenclature symbols, runs the multivariable adjustments, queries the external STRING API, fits logistic classifiers, and saves the output tables and figures:
 ```bash
 python run_real_data_pipeline.py
 ```
 
-### Step 3: Option B - Run the Simulated Covariate Analysis
-This runs the high-sample-size (N=120) demographic simulation which explicitly models RIN and PMI decay kinetics:
+### 3. Execute the Simulated Pipeline
+To test the pipeline on a larger dataset ($N=120$) with explicit autolysis parameters, run:
 ```bash
 python run_mirna_pipeline.py
 ```
 
-### Step 4: Run the Tests
+### 4. Run the Unit Test Suite
+Verify code execution and mathematical correctness (checking log-transforms, OLS shape alignment, ORA logic, and VIF metrics):
 ```bash
 pytest tests/
 ```
 
 ---
 
-## 4. Pipeline Processing Workflow
+## Scientific Findings and Visualizations
 
-1. **Cohort Simulation & QC**: Generates a 120-donor cohort matching the technical and biological profile of ROSMAP/Mayo cohorts, modeling differential degradation rates for mRNA ($\beta \approx 0.22$) vs. miRNA ($\beta \approx 0.05$).
-2. **OLS Differential Expression**: Regresses out clinical demographics (`Age`, `Sex`) and post-mortem confounders (`RIN`, `PMI`) to isolate the true AD effect ($\beta_1$). P-values are corrected using the Benjamini-Hochberg FDR procedure.
-3. **Confounder-Adjusted Correlation**: Regresses out all design matrix covariates and calculates Pearson correlation on the OLS residuals ($\hat{\epsilon}$), verifying authentic biological co-expression.
-4. **Target Enrichment Validation**: Matches negatively correlated miRNA-mRNA pairs against `target_database.json` and runs a Fisher's Exact Test to verify target enrichment.
-5. **Vector Graphics Export**: Saves publication-grade volcano and residual correlation plots.
+All results are automatically output to the `results/` folder at runtime. Below are the core scientific findings and visual figures generated by the real-world pipeline (NCBI GEO GSE16759).
+
+### 1. Differential Expression Analysis (Covariate-Adjusted OLS)
+Despite the limited sample size ($N=8$ matched donors), adjusting for post-mortem covariates (PMI, RIN) and clinical demographics (Age, Sex) reveals clear transcriptomic changes.
+- **`hsa-miR-155`** is significantly upregulated in Alzheimer's Disease ($\text{AD\_Beta} = +1.273$, $p = 0.031$), reflecting neuroinflammatory glial activation.
+- **`hsa-miR-132`** is downregulated ($\text{AD\_Beta} = -0.751$, $p = 0.086$), releasing repression on its validated target transcripts (e.g. `ITPKB` and `EP300`).
+
+The volcano plots illustrating these changes are shown below:
+
+![Differential Expression Volcano Plots](results/figures/real_volcano_plots.svg)
+
+### 2. Confounder-Adjusted Correlation and Stability
+Following multivariable OLS adjustment, we calculate Pearson correlation on the expression residuals ($\hat{\epsilon}$). Running a 1,000-fold bootstrap resampling reveals highly robust negative correlations for validated target pairs:
+- **`hsa-miR-9` vs. `SIRT1`**: Shows a strong, robust negative correlation ($r = -0.907$, $p = 0.0019$, FDR $q = 0.011$, 95% Bootstrap CI: `[-0.995, -0.790]`, Robust = True). SIRT1 is a neuroprotective deacetylase; its repression by upregulated miR-9 indicates a key pathological feedback loop.
+- **`hsa-miR-132` vs. `FOXO1`**: Displays a robust negative correlation ($r = -0.766$, $p = 0.027$, FDR $q = 0.086$, 95% Bootstrap CI: `[-0.963, -0.312]`, Robust = True).
+
+The residual scatter plot for the `hsa-miR-9` vs. `SIRT1` pair is shown below:
+
+![Confounder-Adjusted Residual Scatter Plot](results/figures/real_adjusted_correlation.svg)
+
+### 3. miRNA-mRNA Regulatory Interactome
+The bipartite network connecting AD-dysregulated microRNAs (circles) to target mRNAs (squares) illustrates the complex regulatory architecture:
+
+![miRNA-mRNA Bipartite Interactome](results/figures/real_interactome_network.svg)
+
+### 4. Protein-Protein Interaction (PPI) Network Validation
+Querying the STRING database with the target transcripts reveals a highly coordinated physical and functional protein interactome ($p = 0.0017$). This statistical significance confirms that the targets of the dysregulated microRNAs do not represent random genes but are functionally grouped inside the cell.
+
+The network retrieved programmatically from the STRING database is shown below:
+
+![STRING PPI Target Network](results/figures/target_ppi_network.svg)
+
+### 5. Reactome Pathway Enrichment
+Pathway enrichment against the Reactome database mapping the target transcripts identifies key longevity and cell-survival axes:
+- **Regulation of FOXO transcriptional activity by acetylation** ($p = 3.17 \times 10^{-5}$, FDR $q = 0.0134$): Maps target transcripts `EP300`, `FOXO1`, `SIRT1`, and `MAPK1`.
+- **FOXO-mediated transcription** ($p = 5.88 \times 10^{-4}$, FDR $q = 0.0841$).
+
+This points to a key pathological mechanism where loss of neuronal `hsa-miR-132` leads to upregulated `EP300`, hyper-acetylating both tau protein and `FOXO1`, which triggers apoptotic cascades in cortical neurons.
+
+### 6. Diagnostic Classification on Residuals
+Univariate Logistic Regression classifiers fitted on the technical-adjusted expression residuals (retaining disease signals but clearing PMI, RIN, and demographic covariates) demonstrate high diagnostic classification performance:
+- **`MAPK1` residuals**: ROC-AUC = **0.938**
+- **`hsa-miR-132` residuals**: ROC-AUC = **0.875**
+- **`BACE1` residuals**: ROC-AUC = **0.875**
+
+---
+
+## Repository Publishing and Ignore Policies
+
+To ensure compatibility with GitHub's strict file size restrictions, the repository is configured to prevent committing large datasets and binary outputs:
+1. **Directory Structure Synchronization**: To preserve the directory structure without committing large binary or raw text tables, placeholder `README.md` files (describing folder contents and local download instructions) are placed in all ignored subdirectories.
+2. **Git Ignore Rules**: `.gitignore` is configured to exclude raw `.txt`, `.txt.gz`, and generated `.csv`/`.svg` tables under `data/` and `results/`, while explicitly whitelisting the placeholder `README.md` files:
+   ```gitignore
+   data/**/*
+   !data/**/.gitkeep
+   !data/**/README.md
+   results/**/*
+   !results/**/.gitkeep
+   !results/**/README.md
+   ```
+3. **Search Indexing Excludes**: A `.ignore` file is included at the root directory to prevent text search tools (like `ripgrep`) and IDEs from indexing these local directories.
+4. **Enforcing File Size Limits**: A pre-commit Git hook (`.git/hooks/pre-commit`) is written to intercept all commits, checking the byte size of each staged file. Commits containing files larger than 100 MB are blocked, printing a clear terminal error.
