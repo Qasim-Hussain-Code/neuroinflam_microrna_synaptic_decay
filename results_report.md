@@ -53,11 +53,11 @@ Despite the limited sample size ($N=8$ matching donors), the pipeline successful
 - **`hsa-miR-132` (AD_Beta = -0.751, p = 0.086)**: Downregulated in AD, releasing repression on its target transcripts.
 - **`hsa-miR-9` (AD_Beta = -0.237, p = 0.166)**: Downregulated in AD, representing cell survival and synaptic anomalies.
 
-### 3.3 Confounder-Adjusted Residual Correlation
-After adjusting for diagnostic status, age, sex, and PMI, the remaining variations (residuals) represent donor-specific biological fluctuations:
-- **`hsa-miR-9` vs. `SIRT1` (Validated Target)**: Exhibits a very strong negative residual correlation (**$r = -0.907$, $p = 0.0019$, FDR $q = 0.011$**). Since SIRT1 is a NAD-dependent deacetylase that protects against amyloid accumulation and tau aggregation, its repression by miR-9 represents a critical pathogenic feedback loop.
-- **`hsa-miR-132` vs. `FOXO1` (Validated Target)**: Shows significant negative correlation (**$r = -0.766$, $p = 0.027$, FDR $q = 0.086$**).
-- **`hsa-miR-132` vs. `BACE1`**: Displays a negative correlation (**$r = -0.538$, $p = 0.169$**).
+### 3.3 Confounder-Adjusted Residual Correlation with Bootstrap CIs
+After adjusting for diagnostic status, age, sex, and PMI, the remaining variations (residuals) represent donor-specific biological fluctuations. We validated the robustness of these correlations by running 1,000-fold bootstrap resampling:
+- **`hsa-miR-9` vs. `SIRT1` (Validated Target)**: Exhibits a very strong negative residual correlation (**$r = -0.907$, $p = 0.0019$, FDR $q = 0.011$**, 95% Bootstrap CI: `[-0.995, -0.790]`, **Robust = True**). Since SIRT1 is a NAD-dependent deacetylase that protects against amyloid accumulation and tau aggregation, its repression by miR-9 represents a critical pathogenic feedback loop.
+- **`hsa-miR-132` vs. `FOXO1` (Validated Target)**: Shows significant negative correlation (**$r = -0.766$, $p = 0.027$, FDR $q = 0.086$**, 95% Bootstrap CI: `[-0.963, -0.312]`, **Robust = True**).
+- **`hsa-miR-132` vs. `BACE1`**: Displays a negative correlation (**$r = -0.538$, $p = 0.169$**, 95% Bootstrap CI: `[-0.925, 0.218]`, **Robust = False**).
 
 ---
 

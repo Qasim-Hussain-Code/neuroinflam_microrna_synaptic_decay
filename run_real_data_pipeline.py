@@ -299,12 +299,31 @@ for mir in real_mirna_res.columns:
         r_val, p_val = stats.pearsonr(x, y)
         is_target = mrn in validated_targets.get(mir, [])
         
+        # Bootstrap resampling (1000 iterations)
+        n_boot = 1000
+        n_samples = len(x)
+        boot_rs = []
+        for _ in range(n_boot):
+            idx = np.random.choice(n_samples, size=n_samples, replace=True)
+            if np.std(x[idx]) > 0 and np.std(y[idx]) > 0:
+                r_b, _ = stats.pearsonr(x[idx], y[idx])
+                boot_rs.append(r_b)
+            else:
+                boot_rs.append(np.nan)
+        
+        ci_lower = np.nanpercentile(boot_rs, 2.5)
+        ci_upper = np.nanpercentile(boot_rs, 97.5)
+        is_robust = bool(np.sign(ci_lower) == np.sign(ci_upper) and not (np.isnan(ci_lower) or np.isnan(ci_upper)))
+        
         correlation_records.append({
             "miRNA": mir,
             "mRNA": mrn,
             "Adjusted_R": r_val,
             "PValue": p_val,
-            "Is_Validated_Target": is_target
+            "Is_Validated_Target": is_target,
+            "CI_Lower": ci_lower,
+            "CI_Upper": ci_upper,
+            "Is_Robust": is_robust
         })
 
 corr_df = pd.DataFrame(correlation_records)
@@ -313,8 +332,8 @@ corr_df['QValue'] = corr_q
 corr_df = corr_df.sort_values(by="Adjusted_R")
 corr_df.to_csv("results/correlation_analysis/real_mirna_mrna_correlation_results.csv", index=False)
 
-print("\nTop Negatively Correlated miRNA-mRNA Pairs (Real-World Residuals):")
-print(corr_df[['miRNA', 'mRNA', 'Adjusted_R', 'PValue', 'Is_Validated_Target']].head(6).to_string(index=False))
+print("\nTop Negatively Correlated miRNA-mRNA Pairs (Real-World Residuals & Bootstrap CIs):")
+print(corr_df[['miRNA', 'mRNA', 'Adjusted_R', 'PValue', 'CI_Lower', 'CI_Upper', 'Is_Robust', 'Is_Validated_Target']].head(6).to_string(index=False))
 
 
 print("\n=== [PHASE 6] Hypergeometric Enrichment Test (ORA) ===")
