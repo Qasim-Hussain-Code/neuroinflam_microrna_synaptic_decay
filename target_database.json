@@ -1,0 +1,7 @@
+{
+  "hsa-miR-132-3p": ["ITPKB", "EP300", "FOXO1", "MAPK1"],
+  "hsa-miR-124-3p": ["PTBP1", "BACE1"],
+  "hsa-miR-29a-3p": ["BACE1", "Mcl1"],
+  "hsa-miR-155-5p": ["INPP5D"],
+  "hsa-miR-9-5p": ["SIRT1"]
+}
