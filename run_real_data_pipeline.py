@@ -533,7 +533,74 @@ def plot_bipartite_network(corr_data, mirna_de_df, mrna_de_df, output_path):
 plot_bipartite_network(corr_df, real_mirna_de, real_mrna_de, "results/figures/real_interactome_network.svg")
 
 
-# STRING integration was not present in this version
+print("\n=== [PHASE 9] STRING Protein-Protein Interaction (PPI) Network Integration ===")
+# We query the STRING database API to find physical/functional interactions among our target mRNAs
+string_network_url = "https://string-db.org/api/json/network"
+string_enrichment_url = "https://string-db.org/api/json/ppi_enrichment"
+string_svg_url = "https://string-db.org/api/svg/network"
+
+string_params = {
+    "identifiers": "\r".join(target_mrnas),
+    "species": 9606,  # Homo sapiens NCBI Taxon ID
+    "caller_identity": "neuroinflam_microrna_synaptic_decay"
+}
+
+# 9.1 Query PPI Enrichment p-value
+try:
+    print("Querying STRING API for PPI enrichment statistics...")
+    data_enc = urllib.parse.urlencode(string_params).encode('utf-8')
+    req = urllib.request.Request(string_enrichment_url, data=data_enc)
+    with urllib.request.urlopen(req) as response:
+        enrichment_res = json.loads(response.read().decode('utf-8'))
+    
+    if enrichment_res:
+        stats_data = enrichment_res[0]
+        print(f"[SUCCESS] STRING PPI Enrichment results:")
+        print(f"  - Number of Nodes: {stats_data.get('number_of_nodes')}")
+        print(f"  - Number of Edges: {stats_data.get('number_of_edges')}")
+        print(f"  - Expected Edges: {stats_data.get('expected_number_of_edges')}")
+        print(f"  - Avg Node Degree: {stats_data.get('average_node_degree')}")
+        print(f"  - Clustering Coefficient: {stats_data.get('local_clustering_coefficient'):.3f}")
+        print(f"  - PPI Enrichment p-value: {stats_data.get('p_value'):.2e}")
+        
+        # Save enrichment summary
+        with open("results/correlation_analysis/target_ppi_enrichment.json", "w") as f:
+            json.dump(stats_data, f, indent=4)
+except Exception as e:
+    print(f"[ERROR] STRING PPI Enrichment query failed: {e}")
+
+# 9.2 Query Network Connections
+try:
+    print("Querying STRING API for network connection details...")
+    data_enc = urllib.parse.urlencode(string_params).encode('utf-8')
+    req = urllib.request.Request(string_network_url, data=data_enc)
+    with urllib.request.urlopen(req) as response:
+        network_res = json.loads(response.read().decode('utf-8'))
+        
+    # Convert network connections to TSV
+    if network_res:
+        network_df = pd.DataFrame(network_res)
+        # Sort by score descending
+        network_df = network_df.sort_values(by="score", ascending=False)
+        network_df.to_csv("results/correlation_analysis/target_ppi_network.tsv", sep="\t", index=False)
+        print(f"[SUCCESS] STRING network connections table saved to results/correlation_analysis/target_ppi_network.tsv")
+except Exception as e:
+    print(f"[ERROR] STRING network query failed: {e}")
+
+# 9.3 Download SVG network diagram
+try:
+    print("Downloading STRING network SVG diagram...")
+    svg_params = string_params.copy()
+    svg_params["network_flavor"] = "confidence"
+    data_enc = urllib.parse.urlencode(svg_params).encode('utf-8')
+    req = urllib.request.Request(string_svg_url, data=data_enc)
+    with urllib.request.urlopen(req) as response:
+        svg_content = response.read()
+    with open("results/figures/target_ppi_network.svg", "wb") as f:
+        f.write(svg_content)
+    print("[SUCCESS] STRING SVG network diagram saved to results/figures/target_ppi_network.svg")
+except Exception as e:
+    print(f"[ERROR] STRING SVG download failed: {e}")
 
 
 print("\n=== [PHASE 10] Diagnostic Disease Classification (Logistic Regression) ===")
