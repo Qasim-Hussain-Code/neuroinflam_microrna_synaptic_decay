@@ -26,7 +26,7 @@ Using both a biophysically ground-truthed simulation ($N=120$) and real-world pa
 ### The Post-Mortem Confounder Shield
 Human post-mortem brain samples are inherently degraded. In graduate-tier papers, researchers often correlate raw transcript abundances directly, yielding false-positive signals due to co-degradation. To prevent this, we construct a multivariable design matrix $X$ and fit an Ordinary Least Squares (OLS) model for each molecular feature:
 
-$$\log_2(\text{Expression}_{ij} + 1) = \beta_0 + \beta_1(\text{AD\_Status}_i) + \beta_2(\text{RIN}_i) + \beta_3(\text{PMI}_i) + \beta_4(\text{Age}_i) + \beta_5(\text{Sex}_i) + \epsilon_{ij}$$
+$$\log_2(\text{Expression}_{ij} + 1) = \beta_0 + \beta_1(\text{AD Status}_i) + \beta_2(\text{RIN}_i) + \beta_3(\text{PMI}_i) + \beta_4(\text{Age}_i) + \beta_5(\text{Sex}_i) + \epsilon_{ij}$$
 
 * **Differential Sensitivity**: Our simulation models the biological reality that mRNA degrades rapidly ($\beta_{RIN} \approx 0.22$) while miRNA is protected by Argonaut proteins ($\beta_{RIN} \approx 0.05$).
 * **Residual Correlation**: To isolate genuine biology, we regress out the covariates and extract the OLS residuals:

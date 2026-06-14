@@ -19,7 +19,7 @@ The pipeline processes both a simulated 120-donor cohort (designed to validate t
 ### 1. Multivariable Covariate-Adjusted Regression
 To determine the true effect of Alzheimer's Disease (AD) on expression levels, Ordinary Least Squares (OLS) regression models are fitted independently for each transcript:
 
-$$\log_2(\text{Expression}_{ij} + 1) = \beta_0 + \beta_1(\text{AD\_Status}_i) + \beta_2(\text{RIN}_i) + \beta_3(\text{PMI}_i) + \beta_4(\text{Age}_i) + \beta_5(\text{Sex}_i) + \epsilon_{ij}$$
+$$\log_2(\text{Expression}_{ij} + 1) = \beta_0 + \beta_1 \cdot \text{AD Status}_i + \beta_2 \cdot \text{RIN}_i + \beta_3 \cdot \text{PMI}_i + \beta_4 \cdot \text{Age}_i + \beta_5 \cdot \text{Sex}_i + \epsilon_{ij}$$
 
 Where:
 - $\beta_1$ represents the adjusted effect size of Alzheimer's Disease status.
@@ -66,7 +66,7 @@ The pipeline programmatically queries the STRING database API using the identifi
 ### 7. Diagnostic Logistic Regression Classifier
 To verify if technical-adjusted biological residuals retain diagnostic signals, univariate penalized Logistic Regression classifiers are fitted to predict AD status:
 
-$$P(\text{AD\_Status} = 1 \mid \hat{\epsilon}_g) = \frac{1}{1 + e^{-(\gamma_0 + \gamma_1 \hat{\epsilon}_g)}}$$
+$$P(\text{AD Status} = 1 \mid \hat{\epsilon}_g) = \frac{1}{1 + e^{-(\gamma_0 + \gamma_1 \hat{\epsilon}_g)}}$$
 
 Classification performance is evaluated using the Area Under the Receiver Operating Characteristic curve (ROC-AUC).
 
@@ -148,12 +148,12 @@ All results are automatically output to the `results/` folder at runtime. Below 
 
 ### 1. Differential Expression Analysis (Covariate-Adjusted OLS)
 Despite the limited sample size ($N=8$ matched donors), adjusting for post-mortem covariates (PMI, RIN) and clinical demographics (Age, Sex) reveals clear transcriptomic changes.
-- **`hsa-miR-155`** is significantly upregulated in Alzheimer's Disease ($\text{AD\_Beta} = +1.273$, $p = 0.031$), reflecting neuroinflammatory glial activation.
-- **`hsa-miR-132`** is downregulated ($\text{AD\_Beta} = -0.751$, $p = 0.086$), releasing repression on its validated target transcripts (e.g. `ITPKB` and `EP300`).
+- **`hsa-miR-155`** is significantly upregulated in Alzheimer's Disease (AD_Beta = +1.273, p = 0.031), reflecting neuroinflammatory glial activation.
+- **`hsa-miR-132`** is downregulated (AD_Beta = -0.751, p = 0.086), releasing repression on its validated target transcripts (e.g. `ITPKB` and `EP300`).
 
 The volcano plots illustrating these changes are shown below:
 
-![Differential Expression Volcano Plots](results/figures/real_volcano_plots.svg)
+![Differential Expression Volcano Plots](docs/figures/real_volcano_plots.svg)
 
 ### 2. Confounder-Adjusted Correlation and Stability
 Following multivariable OLS adjustment, we calculate Pearson correlation on the expression residuals ($\hat{\epsilon}$). Running a 1,000-fold bootstrap resampling reveals highly robust negative correlations for validated target pairs:
@@ -162,19 +162,19 @@ Following multivariable OLS adjustment, we calculate Pearson correlation on the 
 
 The residual scatter plot for the `hsa-miR-9` vs. `SIRT1` pair is shown below:
 
-![Confounder-Adjusted Residual Scatter Plot](results/figures/real_adjusted_correlation.svg)
+![Confounder-Adjusted Residual Scatter Plot](docs/figures/real_adjusted_correlation.svg)
 
 ### 3. miRNA-mRNA Regulatory Interactome
 The bipartite network connecting AD-dysregulated microRNAs (circles) to target mRNAs (squares) illustrates the complex regulatory architecture:
 
-![miRNA-mRNA Bipartite Interactome](results/figures/real_interactome_network.svg)
+![miRNA-mRNA Bipartite Interactome](docs/figures/real_interactome_network.svg)
 
 ### 4. Protein-Protein Interaction (PPI) Network Validation
 Querying the STRING database with the target transcripts reveals a highly coordinated physical and functional protein interactome ($p = 0.0017$). This statistical significance confirms that the targets of the dysregulated microRNAs do not represent random genes but are functionally grouped inside the cell.
 
 The network retrieved programmatically from the STRING database is shown below:
 
-![STRING PPI Target Network](results/figures/target_ppi_network.svg)
+![STRING PPI Target Network](docs/figures/target_ppi_network.svg)
 
 ### 5. Reactome Pathway Enrichment
 Pathway enrichment against the Reactome database mapping the target transcripts identifies key longevity and cell-survival axes:
