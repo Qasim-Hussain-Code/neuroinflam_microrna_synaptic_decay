@@ -1,6 +1,5 @@
-# Joint miRNA-mRNA Transcriptomic Profiling of the Parietal Lobe Interactome in Alzheimer's Disease: A Confounder-Adjusted Network Biology Pipeline
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+# Joint miRNA-mRNA Transcriptomic Profiling of the Parietal Lobe Interactome in Alzheimer's Disease: A Confounder-Adjusted Network Biology Pipeline
 
 ## Scientific Scope and Biological Background
 In post-mortem neurodegenerative research, identifying genuine transcriptional alterations is heavily confounded by technical artifacts. Human brain tissue is highly susceptible to post-mortem autolysis, which systematically degrades messenger RNAs (mRNAs). In contrast, microRNAs (miRNAs) complexed with the RNA-induced silencing complex (RISC) exhibit marked resilience to biochemical decay. 
