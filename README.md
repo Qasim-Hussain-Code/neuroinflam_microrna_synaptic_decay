@@ -6,7 +6,7 @@ In post-mortem neurodegenerative research, identifying genuine transcriptional a
 
 Directly correlating transcript abundances without correcting for these differential degradation rates introduces high rates of false-positive co-expression signals. Specifically, co-degradation of fragile mRNAs is often misidentified as biological co-expression or target repression.
 
-This project implements an end-to-end network biology pipeline that resolves this challenge. The pipeline applies a multivariable covariate-adjusted regression model—acting as a "Post-Mortem Confounder Shield"—to isolate disease-associated signals from technical variables, including:
+This project implements an end-to-end network biology pipeline that resolves this challenge. The pipeline applies a multivariable covariate-adjusted regression model, acting as a "Post-Mortem Confounder Shield", to isolate disease-associated signals from technical variables, including:
 1. **RNA Integrity Number (RIN)**: A metric for transcript degradation.
 2. **Post-Mortem Interval (PMI)**: The elapsed time between death and flash-freezing.
 3. **Clinical Demographics**: Controlling for donor age and biological sex.
