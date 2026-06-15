@@ -1,5 +1,7 @@
 # Joint miRNA-mRNA Transcriptomic Profiling of the Parietal Lobe Interactome in Alzheimer's Disease: A Confounder-Adjusted Network Biology Pipeline
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 ## Scientific Scope and Biological Background
 In post-mortem neurodegenerative research, identifying genuine transcriptional alterations is heavily confounded by technical artifacts. Human brain tissue is highly susceptible to post-mortem autolysis, which systematically degrades messenger RNAs (mRNAs). In contrast, microRNAs (miRNAs) complexed with the RNA-induced silencing complex (RISC) exhibit marked resilience to biochemical decay. 
 
@@ -208,3 +210,11 @@ Univariate Logistic Regression classifiers fitted on the technical-adjusted expr
 4. **miRNA Target Databases**:
    - **miRTarBase**: Huang HY, et al. **miRTarBase update 2022: an informative resource for experimentally validated miRNA-target interactions.** *Nucleic Acids Res.*, 2022; 50(D1): D222-D230. [doi:10.1093/nar/gkab1079](https://doi.org/10.1093/nar/gkab1079).
    - **DIANA-TarBase**: Karagkouni D, et al. **DIANA-TarBase v8: a decade-long collection of experimentally supported miRNA-gene interactions.** *Nucleic Acids Res.*, 2018; 46(D1): D278-D285. [doi:10.1093/nar/gkx1141](https://doi.org/10.1093/nar/gkx1141).
+
+---
+
+## License
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for full details.
+
+You are free to use, modify, and distribute this software for academic, research, and commercial purposes, provided that the original copyright notice and permission notice are included in all copies or substantial portions of the software.
