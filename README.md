@@ -13,6 +13,10 @@ This project implements an end-to-end network biology pipeline that resolves thi
 
 The pipeline processes both a simulated 120-donor cohort (designed to validate the statistical framework under controlled decay kinetics) and real-world microarrays from the NCBI GEO dataset GSE16759 (parietal cortex, matching miRNA and mRNA profiles across 8 matched donors).
 
+### Pipeline Overview
+
+![Pipeline Workflow](docs/figures/workflow.png)
+
 ---
 
 ## Mathematical and Statistical Framework
