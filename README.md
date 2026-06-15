@@ -215,6 +215,4 @@ Univariate Logistic Regression classifiers fitted on the technical-adjusted expr
 
 ## License
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for full details.
-
-You are free to use, modify, and distribute this software for academic, research, and commercial purposes, provided that the original copyright notice and permission notice are included in all copies or substantial portions of the software.
+This project is licensed under the **MIT License**, as detailed in the [LICENSE](LICENSE) file. You are free to use, modify, and distribute this software for academic, research, and commercial purposes, provided that the original copyright notice and permission notice are included in all copies or substantial portions of the software.
