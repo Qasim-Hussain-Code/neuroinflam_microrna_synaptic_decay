@@ -191,18 +191,20 @@ Univariate Logistic Regression classifiers fitted on the technical-adjusted expr
 
 ---
 
-## Repository Publishing and Ignore Policies
+## References and Data Sources
 
-To ensure compatibility with GitHub's strict file size restrictions, the repository is configured to prevent committing large datasets and binary outputs:
-1. **Directory Structure Synchronization**: To preserve the directory structure without committing large binary or raw text tables, placeholder `README.md` files (describing folder contents and local download instructions) are placed in all ignored subdirectories.
-2. **Git Ignore Rules**: `.gitignore` is configured to exclude raw `.txt`, `.txt.gz`, and generated `.csv`/`.svg` tables under `data/` and `results/`, while explicitly whitelisting the placeholder `README.md` files:
-   ```gitignore
-   data/**/*
-   !data/**/.gitkeep
-   !data/**/README.md
-   results/**/*
-   !results/**/.gitkeep
-   !results/**/README.md
-   ```
-3. **Search Indexing Excludes**: A `.ignore` file is included at the root directory to prevent text search tools (like `ripgrep`) and IDEs from indexing these local directories.
-4. **Enforcing File Size Limits**: A pre-commit Git hook (`.git/hooks/pre-commit`) is written to intercept all commits, checking the byte size of each staged file. Commits containing files larger than 100 MB are blocked, printing a clear terminal error.
+1. **GSE16759 Dataset (NCBI GEO)**:
+   - **Dataset Link**: [NCBI GEO GSE16759](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE16759)
+   - **Primary Publication**: Nunez-Iglesias J, Liu CC, Morgan TE, Finch CE, Zhou XJ. **Joint Genome-Wide Profiling of miRNA and mRNA Expression in Alzheimer's Disease Cortex Reveals Altered miRNA Regulation.** *PLoS ONE*, 2010; 5(2): e8898. [doi:10.1371/journal.pone.0008898](https://doi.org/10.1371/journal.pone.0008898).
+
+2. **STRING Database**:
+   - **Database Link**: [STRING Database](https://string-db.org/)
+   - **Primary Publication**: Szklarczyk D, Nastou K, Koutrouli M, et al. **The STRING database in 2025: protein networks with directionality of regulation.** *Nucleic Acids Res.*, 2025; 53(D1): D730–D737. [doi:10.1093/nar/gkae1113](https://doi.org/10.1093/nar/gkae1113).
+
+3. **Reactome Pathway Database**:
+   - **Database Link**: [Reactome Knowledgebase](https://reactome.org/)
+   - **Primary Publication**: Ragueneau E, et al. **The Reactome Knowledgebase 2026.** *Nucleic Acids Res.*, 2025 Nov 18. [doi:10.1093/nar/gkaf1223](https://doi.org/10.1093/nar/gkaf1223). (Alternative citation: Milacic M, et al. **The Reactome Pathway Knowledgebase 2024.** *Nucleic Acids Res.*, 2024; 52(D1): D672–D678. [doi:10.1093/nar/gkad1025](https://doi.org/10.1093/nar/gkad1025)).
+
+4. **miRNA Target Databases**:
+   - **miRTarBase**: Huang HY, et al. **miRTarBase update 2022: an informative resource for experimentally validated miRNA-target interactions.** *Nucleic Acids Res.*, 2022; 50(D1): D222-D230. [doi:10.1093/nar/gkab1079](https://doi.org/10.1093/nar/gkab1079).
+   - **DIANA-TarBase**: Karagkouni D, et al. **DIANA-TarBase v8: a decade-long collection of experimentally supported miRNA-gene interactions.** *Nucleic Acids Res.*, 2018; 46(D1): D278-D285. [doi:10.1093/nar/gkx1141](https://doi.org/10.1093/nar/gkx1141).
