@@ -60,9 +60,9 @@ Pairwise Pearson correlation coefficients ($r$) are then computed on these resid
 
 To evaluate correlation stability in small-sample cohorts (e.g., the matched $N = 8$ GSE16759 dataset), non-parametric bootstrap resampling ($B = 1{,}000$ iterations, sampling donors with replacement) is performed. A correlation is classified as **robust** if and only if the 95% percentile bootstrap confidence interval excludes zero:
 
-$$\mathrm{sign}\!\left(r^*_{0.025}\right) = \mathrm{sign}\!\left(r^*_{0.975}\right)$$
+$$\mathrm{sign}\!\left(r^{\ast}_{0.025}\right) = \mathrm{sign}\!\left(r^{\ast}_{0.975}\right)$$
 
-where $r^*_{0.025}$ and $r^*_{0.975}$ denote the 2.5th and 97.5th percentile bootstrap estimates, respectively.
+where $r^{\ast}_{0.025}$ and $r^{\ast}_{0.975}$ denote the 2.5th and 97.5th percentile bootstrap estimates, respectively.
 
 ### 2.5 Over-Representation Analysis (ORA)
 
