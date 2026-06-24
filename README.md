@@ -169,8 +169,6 @@ After adjustment for PMI, RIN, age, and sex, the pipeline identifies the followi
 | **hsa-miR-155** | $+1.273$ | $0.031$ | Significant upregulation; consistent with microglial neuroinflammatory activation |
 | **hsa-miR-132** | $-0.751$ | $0.086$ | Downregulation; de-repression of validated targets (*ITPKB*, *EP300*) |
 
-![Differential Expression Volcano Plots](docs/figures/real_volcano_plots.svg)
-
 ### 5.2 Confounder-Adjusted Residual Correlations
 
 Pearson correlations computed on OLS residuals ($\hat{\varepsilon}$), with 1,000-fold bootstrap stability assessment:
@@ -182,13 +180,9 @@ Pearson correlations computed on OLS residuals ($\hat{\varepsilon}$), with 1,000
 
 The strong inverse correlation between hsa-miR-9 and *SIRT1* (a NAD⁺-dependent deacetylase with established neuroprotective functions) implicates miR-9-mediated SIRT1 repression as a pathogenic feedback loop contributing to impaired amyloid clearance and tau hyperacetylation.
 
-![Confounder-Adjusted Residual Scatter Plot](docs/figures/real_adjusted_correlation.svg)
-
 ### 5.3 miRNA–mRNA Regulatory Interactome
 
 The bipartite network connecting AD-dysregulated miRNAs to their target mRNAs reveals a complex post-transcriptional regulatory architecture:
-
-![miRNA–mRNA Bipartite Interactome](docs/figures/real_interactome_network.svg)
 
 ### 5.4 STRING PPI Network Validation
 
@@ -203,8 +197,6 @@ Query of the STRING database (v12.0) with the 11 target transcripts yields:
 | **PPI enrichment $p$-value** | **0.0017** |
 
 The significant enrichment ($p = 0.0017$) confirms that the miRNA-targeted transcripts encode proteins that participate in a functionally coordinated interaction network, rather than representing a random gene set.
-
-![STRING PPI Target Network](docs/figures/target_ppi_network.svg)
 
 ### 5.5 Reactome Pathway Enrichment
 
